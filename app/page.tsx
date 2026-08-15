@@ -4,15 +4,30 @@ import { FormEvent, MouseEvent, useEffect, useMemo, useState } from "react";
 
 type WikiPage = { title: string; displayTitle: string; html: string };
 type Step = { title: string };
+type WikiApiResponse = { parse?: { title: string; displaytitle: string; text: { "*": string } }; error?: unknown };
 
 const examples = [["비둘기", "C++"], ["김치", "블랙홀"], ["마인크래프트", "미적분학"]];
 const normalize = (v: string) => v.replaceAll("_", " ").trim().toLocaleLowerCase("ko-KR");
 
 async function fetchWiki(title: string): Promise<WikiPage> {
-  const response = await fetch(`/api/wiki?title=${encodeURIComponent(title)}`);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "위키백과 문서를 찾을 수 없습니다.");
-  return data as WikiPage;
+  const params = new URLSearchParams({
+    action: "parse",
+    page: title,
+    prop: "text|displaytitle",
+    redirects: "1",
+    format: "json",
+    origin: "*",
+  });
+
+  const response = await fetch(`https://ko.wikipedia.org/w/api.php?${params.toString()}`);
+  const data = (await response.json()) as WikiApiResponse;
+  if (!response.ok || data.error || !data.parse) throw new Error("위키백과 문서를 찾을 수 없습니다.");
+
+  return {
+    title: data.parse.title,
+    displayTitle: data.parse.displaytitle,
+    html: data.parse.text["*"],
+  };
 }
 
 export default function Home() {
