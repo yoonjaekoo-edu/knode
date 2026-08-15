@@ -20,7 +20,7 @@ async function fetchWiki(title: string): Promise<WikiPage> {
 
 export default function Home() {
   const initialPair = useMemo(() => getRandomPair(), []);
-  const [start,setStart]=useState(initialPair.start), [target,setTarget]=useState(initialPair.target), [goal,setGoal]=useState("");
+  const [start,setStart]=useState<string>(initialPair.start), [target,setTarget]=useState<string>(initialPair.target), [goal,setGoal]=useState<string>("");
   const [page,setPage]=useState<WikiPage|null>(null), [path,setPath]=useState<Step[]>([]);
   const [startedAt,setStartedAt]=useState(0), [seconds,setSeconds]=useState(0);
   const [loading,setLoading]=useState(false), [error,setError]=useState(""), [won,setWon]=useState(false);
