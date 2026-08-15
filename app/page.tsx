@@ -5,8 +5,37 @@ import { FormEvent, MouseEvent, useEffect, useMemo, useState } from "react";
 type WikiPage = { title: string; displayTitle: string; html: string };
 type Step = { title: string };
 
+type WikiApiResponse = {
+  parse?: { title: string; displaytitle: string; text: { "*": string } };
+  error?: unknown;
+};
+
 const examples = [["비둘기", "C++"], ["김치", "블랙홀"], ["마인크래프트", "미적분학"]];
 const normalize = (v: string) => v.replaceAll("_", " ").trim().toLocaleLowerCase("ko-KR");
+
+async function fetchWiki(title: string): Promise<WikiPage> {
+  const params = new URLSearchParams({
+    action: "parse",
+    page: title,
+    prop: "text|displaytitle",
+    redirects: "1",
+    format: "json",
+    origin: "*",
+  });
+
+  const response = await fetch(`https://ko.wikipedia.org/w/api.php?${params.toString()}`);
+  const data = (await response.json()) as WikiApiResponse;
+
+  if (!response.ok || data.error || !data.parse) {
+    throw new Error("위키백과 문서를 찾을 수 없습니다.");
+  }
+
+  return {
+    title: data.parse.title,
+    displayTitle: data.parse.displaytitle,
+    html: data.parse.text["*"],
+  };
+}
 
 export default function Home() {
   const [start,setStart]=useState("비둘기"), [target,setTarget]=useState("C++"), [goal,setGoal]=useState("");
@@ -20,13 +49,13 @@ export default function Home() {
 
   async function loadArticle(title:string){
     setLoading(true); setError("");
-    try{ const r=await fetch(`/api/wiki?title=${encodeURIComponent(title)}`), data=await r.json(); if(!r.ok)throw new Error(data.error||"문서를 불러오지 못했습니다."); setPage(data); setPath(old=>[...old,{title:data.title}]); window.scrollTo({top:0,behavior:"smooth"}); if(goal&&normalize(data.title)===normalize(goal))setWon(true); }
+    try{ const data=await fetchWiki(title); setPage(data); setPath(old=>[...old,{title:data.title}]); window.scrollTo({top:0,behavior:"smooth"}); if(goal&&normalize(data.title)===normalize(goal))setWon(true); }
     catch(e){setError(e instanceof Error?e.message:"오류가 발생했습니다.");} finally{setLoading(false);}
   }
 
   async function begin(e?:FormEvent){
     e?.preventDefault(); if(!start.trim()||!target.trim())return; setError("");setWon(false);setPage(null);setPath([]);setSeconds(0);setLoading(true);
-    try{ const [sr,tr]=await Promise.all([fetch(`/api/wiki?title=${encodeURIComponent(start.trim())}`),fetch(`/api/wiki?title=${encodeURIComponent(target.trim())}`)]); const sd=await sr.json(),td=await tr.json(); if(!sr.ok)throw new Error(`출발 문서 '${start}'를 찾을 수 없습니다.`);if(!tr.ok)throw new Error(`목표 문서 '${target}'를 찾을 수 없습니다.`);setGoal(td.title);setTarget(td.title);setStart(sd.title);setPage(sd);setPath([{title:sd.title}]);setStartedAt(Date.now());if(normalize(sd.title)===normalize(td.title))setWon(true); }
+    try{ const [sd,td]=await Promise.all([fetchWiki(start.trim()),fetchWiki(target.trim())]); setGoal(td.title);setTarget(td.title);setStart(sd.title);setPage(sd);setPath([{title:sd.title}]);setStartedAt(Date.now());if(normalize(sd.title)===normalize(td.title))setWon(true); }
     catch(e){setError(e instanceof Error?e.message:"게임을 시작하지 못했습니다.");}finally{setLoading(false);}
   }
 
