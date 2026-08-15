@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KNODE Path logo">
+  <g fill="none" stroke="#424874" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 118v276h62V256"/>
+    <path d="M212 256L344 124"/>
+    <path d="M212 256L344 388"/>
+  </g>
+  <g fill="#424874">
+    <circle cx="150" cy="394" r="30"/><circle cx="212" cy="256" r="30"/><circle cx="344" cy="124" r="30"/><circle cx="344" cy="388" r="30"/>
+  </g>
+  <circle cx="150" cy="394" r="14" fill="#7f8dca"/>
+  <circle cx="212" cy="256" r="14" fill="#a6b1e1"/>
+  <circle cx="344" cy="124" r="14" fill="#dcd6f7"/>
+  <circle cx="344" cy="388" r="14" fill="#dcd6f7"/>
+</svg>
