@@ -14,6 +14,11 @@ KNODE is a Wikipedia navigation game. Choose two articles, then reach the target
 - Full path history
 - Completion screen
 - Responsive UI
+- Fully static GitHub Pages deployment
+
+## Live
+
+https://yoonjaekoo-edu.github.io/knode/
 
 ## Palette
 
